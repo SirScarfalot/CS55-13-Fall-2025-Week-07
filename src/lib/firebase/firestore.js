@@ -48,21 +48,56 @@ export async function updateRestaurantImageReference(
   }
 }
 
-// Placeholder function for updating restaurant rating (currently empty)
 const updateWithRating = async (
   transaction,
   docRef,
   newRatingDocument,
   review
 ) => {
-  // Return nothing (function not implemented yet)
-  return;
+  const restaurant = await transaction.get(docRef);
+  const data = restaurant.data();
+  const newNumRatings = data?.numRatings ? data.numRatings + 1 : 1;
+  const newSumRating = (data?.sumRating || 0) + Number(review.rating);
+  const newAverage = newSumRating / newNumRatings;
+
+  transaction.update(docRef, {
+    numRatings: newNumRatings,
+    sumRating: newSumRating,
+    avgRating: newAverage,
+  });
+
+  transaction.set(newRatingDocument, {
+    ...review,
+    timestamp: Timestamp.fromDate(new Date()),
+  });
 };
 
-// Placeholder function for adding a review to a restaurant (currently empty)
 export async function addReviewToRestaurant(db, restaurantId, review) {
-  // Return nothing (function not implemented yet)
-  return;
+  if (!restaurantId) {
+          throw new Error("No restaurant ID has been provided.");
+  }
+
+  if (!review) {
+          throw new Error("A valid review has not been provided.");
+  }
+
+  try {
+          const docRef = doc(collection(db, "restaurants"), restaurantId);
+          const newRatingDocument = doc(
+                  collection(db, `restaurants/${restaurantId}/ratings`)
+          );
+
+          // corrected line
+          await runTransaction(db, transaction =>
+                  updateWithRating(transaction, docRef, newRatingDocument, review)
+          );
+  } catch (error) {
+          console.error(
+                  "There was an error adding the rating to the restaurant",
+                  error
+          );
+          throw error;
+  }
 }
 
 // Helper function to apply filters to a Firestore query
