@@ -54,10 +54,15 @@ const updateWithRating = async (
   newRatingDocument,
   review
 ) => {
+  // Get the current restaurant document data within the transaction
   const restaurant = await transaction.get(docRef);
+  // Extract the data from the document snapshot
   const data = restaurant.data();
+  // Calculate new total number of ratings (increment by 1, or set to 1 if no ratings exist)
   const newNumRatings = data?.numRatings ? data.numRatings + 1 : 1;
+  // Calculate new sum of all ratings (add current rating to existing sum, or start with current rating)
   const newSumRating = (data?.sumRating || 0) + Number(review.rating);
+  // Calculate new average rating by dividing total sum by number of ratings
   const newAverage = newSumRating / newNumRatings;
 
   transaction.update(docRef, {
@@ -66,36 +71,48 @@ const updateWithRating = async (
     avgRating: newAverage,
   });
 
+  // Create the new review document with review data and current timestamp
   transaction.set(newRatingDocument, {
     ...review,
     timestamp: Timestamp.fromDate(new Date()),
   });
 };
 
+// Function to add a new review to a restaurant and update its rating statistics atomically
 export async function addReviewToRestaurant(db, restaurantId, review) {
+  // Validate that restaurantId parameter is provided and not empty
   if (!restaurantId) {
+          // Throw an error if restaurant ID is missing
           throw new Error("No restaurant ID has been provided.");
   }
 
+  // Validate that review parameter is provided and not empty
   if (!review) {
+          // Throw an error if review data is missing
           throw new Error("A valid review has not been provided.");
   }
 
+  // Wrap the database operations in a try-catch block for error handling
   try {
+          // Create a document reference to the specific restaurant document
           const docRef = doc(collection(db, "restaurants"), restaurantId);
+          // Create a document reference for the new review in the restaurant's ratings subcollection
           const newRatingDocument = doc(
                   collection(db, `restaurants/${restaurantId}/ratings`)
           );
 
-          // corrected line
+          // Execute the database operations within a transaction to ensure atomicity
           await runTransaction(db, transaction =>
+                  // Call the helper function to update rating stats and add the review
                   updateWithRating(transaction, docRef, newRatingDocument, review)
           );
   } catch (error) {
+          // Log the error details to the console for debugging
           console.error(
                   "There was an error adding the rating to the restaurant",
                   error
           );
+          // Re-throw the error so calling code can handle it appropriately
           throw error;
   }
 }
