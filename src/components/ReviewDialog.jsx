@@ -55,7 +55,6 @@ const ReviewDialog = ({
   return (
     // Create a dialog element with ref and click handler
     <dialog ref={dialog} onMouseDown={handleClick}>
-      // Create a form that submits to the server action
       <form
         // Set the server action to handle form submission
         action={handleReviewFormSubmission}
@@ -64,19 +63,13 @@ const ReviewDialog = ({
           handleClose();
         }}
       >
-        // Dialog header section
         <header>
-          // Dialog title
           <h3>Add your review</h3>
         </header>
-        // Dialog main content section
         <article>
-          // Rating picker component for star selection
           <RatingPicker />
 
-          // Paragraph containing text input
           <p>
-            // Text input for review content
             <input
               // Set input type to text
               type="text"
@@ -94,17 +87,11 @@ const ReviewDialog = ({
               onChange={(e) => onChange(e.target.value, "text")}
             />
           </p>
-
-          // Hidden input to pass restaurant ID to form
           <input type="hidden" name="restaurantId" value={id} />
-          // Hidden input to pass user ID to form
           <input type="hidden" name="userId" value={userId} />
         </article>
-        // Dialog footer with action buttons
         <footer>
-          // Menu container for buttons
           <menu>
-            // Cancel button
             <button
               // Automatically focus this button
               autoFocus
@@ -117,7 +104,6 @@ const ReviewDialog = ({
             >
               Cancel
             </button>
-            // Submit button
             <button type="submit" value="confirm" className="button--confirm">
               Submit
             </button>
