@@ -69,6 +69,7 @@ const updateWithRating = async (
     numRatings: newNumRatings,
     sumRating: newSumRating,
     avgRating: newAverage,
+    lastReviewUserId: review.userId,
   });
 
   // Create the new review document with review data and current timestamp

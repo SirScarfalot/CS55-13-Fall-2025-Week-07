@@ -14,7 +14,7 @@ import { getFirestore } from "firebase/firestore";
 // Export async function to handle form submission for restaurant reviews
 export async function handleReviewFormSubmission(data) {
   // Get authenticated Firebase app instance for server-side operations
-  const { app } = await getAuthenticatedAppForUser();
+  const { app, currentUser } = await getAuthenticatedAppForUser();
   // Get Firestore database instance from the authenticated app
   const db = getFirestore(app);
 
@@ -24,10 +24,7 @@ export async function handleReviewFormSubmission(data) {
           text: data.get("text"),
           // Extract rating value from form data
           rating: data.get("rating"),
-
-          // This came from a hidden form field.
-          // Extract user ID from form data
-          userId: data.get("userId"),
+          userId: currentUser.uid,
   });
 }
 
